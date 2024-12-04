@@ -13,9 +13,8 @@ blueprint:
           point_tracker: "input_number.kid2_points"
       selector:
         object:
-          - name: text
-            point_tracker: entity
-              domain: input_number
+          additionalProperties:
+            type: string
     chore_name:
       name: Chore Name
       description: "Name of the chore."
@@ -46,8 +45,7 @@ trigger:
 
 action:
   - choose:
-      - conditions: >
-          {{ trigger.entity_id == !input source_helper }}
+      - conditions: "{{ trigger.entity_id == !input source_helper }}"
         sequence:
           - variables:
               target_user: "{{ users[0].point_tracker }}"
