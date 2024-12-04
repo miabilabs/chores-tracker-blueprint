@@ -14,7 +14,7 @@ blueprint:
       selector:
         object:
           - name: text
-            point_tracker: entity:
+            point_tracker: entity
               domain: input_number
     chore_name:
       name: Chore Name
