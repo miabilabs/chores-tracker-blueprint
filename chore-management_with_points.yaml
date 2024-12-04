@@ -1,0 +1,62 @@
+blueprint:
+  name: Chore Management with Configurable Users
+  description: "Track chores and points for a configurable number of users."
+  domain: automation
+  input:
+    users:
+      name: Users
+      description: "List of users participating in chore tracking."
+      default:
+        - name: "Kid 1"
+          point_tracker: "input_number.kid1_points"
+        - name: "Kid 2"
+          point_tracker: "input_number.kid2_points"
+      selector:
+        object:
+          - name: text
+            point_tracker: entity:
+              domain: input_number
+    chore_name:
+      name: Chore Name
+      description: "Name of the chore."
+      selector:
+        text: {}
+    chore_points:
+      name: Point Value
+      description: "Points assigned for completing this chore."
+      default: 10
+      selector:
+        number:
+          min: 1
+          max: 100
+          unit_of_measurement: points
+    source_helper:
+      name: Source Helper
+      description: "Helper for the chore trigger."
+      selector:
+        entity:
+          domain: input_boolean
+
+mode: single
+
+trigger:
+  - platform: state
+    entity_id: !input source_helper
+    to: "on"
+
+action:
+  - choose:
+      - conditions: >
+          {{ trigger.entity_id == !input source_helper }}
+        sequence:
+          - variables:
+              target_user: "{{ users[0].point_tracker }}"
+          - service: input_number.set_value
+            target:
+              entity_id: "{{ target_user }}"
+            data:
+              value: >
+                {{ states(target_user) | int + !input chore_points }}
+          - service: input_boolean.turn_off
+            target:
+              entity_id: !input source_helper
