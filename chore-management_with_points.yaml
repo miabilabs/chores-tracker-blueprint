@@ -1,52 +1,26 @@
 blueprint:
-  name: Chore Management with Configurable Users
-  description: "Track chores and points for a configurable number of users."
+  name: Hello World
+  description: A simple blueprint to test functionality.
   domain: automation
   input:
-    users:
-      name: Users
-      description: "List of users with their point trackers."
-      default:
-        - name: "Kid 1"
-          point_tracker: "input_number.kid1_points"
-        - name: "Kid 2"
-          point_tracker: "input_number.kid2_points"
-    chore_name:
-      name: Chore Name
-      description: "Name of the chore."
+    trigger_entity:
+      name: Trigger Entity
+      description: The entity that will trigger this automation.
+      selector:
+        entity: {}
+    message:
+      name: Message
+      description: The message to display when the automation triggers.
+      default: "Hello, World!"
       selector:
         text: {}
-    chore_points:
-      name: Point Value
-      description: "Points assigned for completing this chore."
-      default: 10
-      selector:
-        number:
-          min: 1
-          max: 100
-    source_helper:
-      name: Source Helper
-      description: "Helper to trigger the chore."
-      selector:
-        entity:
-          domain: input_boolean
-
-mode: single
 
 trigger:
   - platform: state
-    entity_id: !input source_helper
-    to: "on"
+    entity_id: !input trigger_entity
 
 action:
-  - variables:
-      target_user: "{{ users[0].point_tracker }}"  # Adjust to match logic for selecting user
-  - service: input_number.set_value
-    target:
-      entity_id: "{{ target_user }}"
+  - service: notify.persistent_notification
     data:
-      value: >
-        {{ states(target_user) | int + !input chore_points }}
-  - service: input_boolean.turn_off
-    target:
-      entity_id: !input source_helper
+      message: !input message
+      title: "Hello World Notification"
