@@ -5,16 +5,12 @@ blueprint:
   input:
     users:
       name: Users
-      description: "List of users participating in chore tracking."
+      description: "List of users with their point trackers."
       default:
         - name: "Kid 1"
           point_tracker: "input_number.kid1_points"
         - name: "Kid 2"
           point_tracker: "input_number.kid2_points"
-      selector:
-        object:
-          additionalProperties:
-            type: string
     chore_name:
       name: Chore Name
       description: "Name of the chore."
@@ -28,10 +24,9 @@ blueprint:
         number:
           min: 1
           max: 100
-          unit_of_measurement: points
     source_helper:
       name: Source Helper
-      description: "Helper for the chore trigger."
+      description: "Helper to trigger the chore."
       selector:
         entity:
           domain: input_boolean
@@ -44,17 +39,14 @@ trigger:
     to: "on"
 
 action:
-  - choose:
-      - conditions: "{{ trigger.entity_id == !input source_helper }}"
-        sequence:
-          - variables:
-              target_user: "{{ users[0].point_tracker }}"
-          - service: input_number.set_value
-            target:
-              entity_id: "{{ target_user }}"
-            data:
-              value: >
-                {{ states(target_user) | int + !input chore_points }}
-          - service: input_boolean.turn_off
-            target:
-              entity_id: !input source_helper
+  - variables:
+      target_user: "{{ users[0].point_tracker }}"  # Adjust to match logic for selecting user
+  - service: input_number.set_value
+    target:
+      entity_id: "{{ target_user }}"
+    data:
+      value: >
+        {{ states(target_user) | int + !input chore_points }}
+  - service: input_boolean.turn_off
+    target:
+      entity_id: !input source_helper
